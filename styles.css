@@ -81,11 +81,259 @@ h3 {
     grid-column: 1;
 }
 
+.user-type-selector {
+    margin-bottom: 30px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 2px solid #e9ecef;
+}
+
+.user-type-selector label {
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 15px;
+    display: block;
+}
+
+.radio-group {
+    display: flex;
+    gap: 20px;
+}
+
+.radio-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    padding: 10px 20px;
+    border: 2px solid #e1e8ed;
+    border-radius: 8px;
+    background: white;
+    transition: all 0.3s ease;
+    font-weight: 600;
+}
+
+.radio-label:hover {
+    border-color: #667eea;
+    background: #f8f9fa;
+}
+
+.radio-label input[type="radio"] {
+    margin: 0;
+}
+
+.radio-label input[type="radio"]:checked + span {
+    color: #667eea;
+}
+
+.radio-label:has(input[type="radio"]:checked) {
+    border-color: #667eea;
+    background: rgba(102, 126, 234, 0.1);
+}
+
 .form-group {
     display: flex;
     align-items: center;
     margin-bottom: 20px;
     gap: 10px;
+}
+
+.help-text {
+    font-size: 0.85em;
+    color: #7f8c8d;
+    font-style: italic;
+    margin-top: 5px;
+    flex-basis: 100%;
+}
+
+.family-plan-form {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 2px solid #e9ecef;
+}
+
+.children-details {
+    margin-top: 20px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 2px solid #e9ecef;
+}
+
+.children-details h4 {
+    color: #2c3e50;
+    margin-bottom: 15px;
+    font-size: 1.1em;
+}
+
+.child-item {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    border: 1px solid #dee2e6;
+}
+
+.child-item h5 {
+    color: #495057;
+    margin-bottom: 15px;
+    font-size: 1em;
+    border-bottom: 1px solid #e9ecef;
+    padding-bottom: 8px;
+}
+
+.secondary-btn {
+    background: #6c757d;
+    color: white;
+    margin-top: 15px;
+}
+
+.secondary-btn:hover {
+    background: #5a6268;
+}
+
+.required-income-display {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    padding: 20px;
+    border-radius: 8px;
+    margin-top: 20px;
+    text-align: center;
+}
+
+.required-income-display h4 {
+    margin-bottom: 10px;
+    font-size: 1.2em;
+}
+
+.required-income-value {
+    font-size: 2em;
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+.required-income-note {
+    font-size: 0.9em;
+    opacity: 0.9;
+}
+
+.scholarship-calculation {
+    background: #e3f2fd;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 10px;
+    border: 2px solid #bbdefb;
+}
+
+.calculated-payment {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.calculated-payment .label {
+    font-weight: 600;
+    color: #1976d2;
+}
+
+.calculated-payment .value {
+    font-size: 1.2em;
+    font-weight: 700;
+    color: #0d47a1;
+}
+
+.age-details {
+    position: relative;
+    background: white;
+    border: 2px solid #667eea;
+    border-radius: 12px;
+    padding: 25px;
+    margin-top: 20px;
+    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.15);
+}
+
+.age-details h3 {
+    color: #667eea;
+    margin-bottom: 20px;
+    font-size: 1.3em;
+    border-bottom: 2px solid #667eea;
+    padding-bottom: 10px;
+}
+
+.age-details-content {
+    display: grid;
+    gap: 15px;
+}
+
+.detail-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.detail-label {
+    font-weight: 600;
+    color: #495057;
+}
+
+.detail-value {
+    font-weight: 700;
+    color: #2c3e50;
+    font-size: 1.1em;
+}
+
+.detail-advice, .detail-required {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    border-left: 4px solid #667eea;
+}
+
+.detail-advice h4, .detail-required h4 {
+    color: #495057;
+    margin-bottom: 10px;
+    font-size: 1em;
+}
+
+.detail-advice ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.detail-advice li {
+    margin-bottom: 5px;
+    color: #6c757d;
+}
+
+.detail-requirements {
+    color: #495057;
+    line-height: 1.6;
+}
+
+.close-btn {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    background: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.close-btn:hover {
+    background: #c0392b;
 }
 
 .form-group label {

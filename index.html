@@ -17,29 +17,88 @@
         <main>
             <section class="input-section">
                 <h2>基本情報</h2>
+                
+                <div class="user-type-selector">
+                    <label>あなたの状況</label>
+                    <div class="radio-group">
+                        <label class="radio-label">
+                            <input type="radio" name="user-type" value="student" id="user-type-student">
+                            <span>大学生</span>
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="user-type" value="working" id="user-type-working" checked>
+                            <span>社会人</span>
+                        </label>
+                    </div>
+                </div>
+
                 <form id="basic-info-form" class="basic-info-form">
                     <div class="form-group">
                         <label for="current-age">現在の年齢</label>
-                        <input type="number" id="current-age" min="18" max="80" value="25" required>
+                        <input type="number" id="current-age" min="18" max="80" value="20" required>
                         <span class="unit">歳</span>
                     </div>
                     
                     <div class="form-group">
                         <label for="current-savings">現在の貯蓄額</label>
-                        <input type="number" id="current-savings" min="0" value="1000000" required>
+                        <input type="number" id="current-savings" min="0" value="100000" required>
                         <span class="unit">円</span>
+                    </div>
+                    
+                    <div class="form-group student-only" style="display: none;">
+                        <label for="graduation-age">卒業予定年齢</label>
+                        <input type="number" id="graduation-age" min="20" max="30" value="22">
+                        <span class="unit">歳</span>
+                    </div>
+                    
+                    <div class="form-group student-only" style="display: none;">
+                        <label for="starting-salary">就職後の初任給（手取り）</label>
+                        <input type="number" id="starting-salary" min="0" value="250000">
+                        <span class="unit">円/月</span>
                     </div>
                     
                     <div class="form-group">
                         <label for="monthly-income">毎月の収入（手取り）</label>
-                        <input type="number" id="monthly-income" min="0" value="300000" required>
+                        <input type="number" id="monthly-income" min="0" value="80000" required>
                         <span class="unit">円</span>
+                        <small class="help-text student-only" style="display: none;">バイト代、仕送り等の合計</small>
+                        <small class="help-text working-only">手取り給与額</small>
                     </div>
                     
                     <div class="form-group">
                         <label for="monthly-expense">毎月の支出</label>
-                        <input type="number" id="monthly-expense" min="0" value="200000" required>
+                        <input type="number" id="monthly-expense" min="0" value="70000" required>
                         <span class="unit">円</span>
+                        <small class="help-text">生活費、家賃、食費等の合計</small>
+                    </div>
+                    
+                    <div class="form-group student-only" style="display: none;">
+                        <label for="scholarship-debt">奨学金の借入総額</label>
+                        <input type="number" id="scholarship-debt" min="0" value="0">
+                        <span class="unit">円</span>
+                        <small class="help-text">返済予定の奨学金額</small>
+                    </div>
+                    
+                    <div class="form-group student-only" style="display: none;">
+                        <label for="scholarship-interest">奨学金の年利率</label>
+                        <input type="number" id="scholarship-interest" min="0" max="10" step="0.1" value="0.3">
+                        <span class="unit">%</span>
+                        <small class="help-text">年利率（有利子奨学金の場合）</small>
+                    </div>
+                    
+                    <div class="form-group student-only" style="display: none;">
+                        <label for="scholarship-years">返済期間</label>
+                        <input type="number" id="scholarship-years" min="1" max="20" value="15">
+                        <span class="unit">年</span>
+                        <small class="help-text">就職後の返済年数</small>
+                    </div>
+                    
+                    <div class="scholarship-calculation student-only" style="display: none;">
+                        <div class="calculated-payment">
+                            <span class="label">計算された月返済額：</span>
+                            <span id="calculated-monthly-payment" class="value">¥0</span>
+                        </div>
+                        <button type="button" id="recalculate-scholarship" class="secondary-btn">再計算</button>
                     </div>
                     
                     <div class="form-group">
@@ -48,12 +107,81 @@
                         <span class="unit">歳</span>
                     </div>
                 </form>
+
+                <h3>家族計画</h3>
+                <form id="family-plan-form" class="family-plan-form">
+                    <div class="form-group">
+                        <label for="marriage-age">結婚予定年齢</label>
+                        <input type="number" id="marriage-age" min="20" max="50" value="28">
+                        <span class="unit">歳</span>
+                        <small class="help-text">結婚しない場合は空欄</small>
+                    </div>
+
+                    <div class="form-group marriage-dependent" style="display: none;">
+                        <label for="spouse-work-type">配偶者の働き方</label>
+                        <select id="spouse-work-type">
+                            <option value="full-time">フルタイム勤務</option>
+                            <option value="part-time">パートタイム勤務</option>
+                            <option value="homemaker">専業主婦/主夫</option>
+                            <option value="temporary-leave">一時的に離職（育児等）</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group marriage-dependent" style="display: none;">
+                        <label for="spouse-income">配偶者の月収入（手取り）</label>
+                        <input type="number" id="spouse-income" min="0" value="200000">
+                        <span class="unit">円</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="children-count">子どもの人数</label>
+                        <input type="number" id="children-count" min="0" max="5" value="0">
+                        <span class="unit">人</span>
+                    </div>
+
+                    <div id="children-details" class="children-details" style="display: none;">
+                        <h4>子どもの詳細設定</h4>
+                        <div id="children-container"></div>
+                        <button type="button" id="auto-calculate-children" class="secondary-btn">標準設定で自動計算</button>
+                    </div>
+                </form>
             </section>
 
             <section class="chart-section">
                 <h2>資産推移グラフ</h2>
                 <div class="chart-container">
                     <canvas id="asset-chart"></canvas>
+                </div>
+                
+                <div id="age-details" class="age-details" style="display: none;">
+                    <h3 id="selected-age-title">年齢別詳細</h3>
+                    <div class="age-details-content">
+                        <div class="detail-item">
+                            <span class="detail-label">推定資産額：</span>
+                            <span id="detail-assets" class="detail-value"></span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">月収入：</span>
+                            <span id="detail-income" class="detail-value"></span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">月支出：</span>
+                            <span id="detail-expense" class="detail-value"></span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">年間収支：</span>
+                            <span id="detail-annual-balance" class="detail-value"></span>
+                        </div>
+                        <div class="detail-advice">
+                            <h4>💡 この年齢での推奨事項</h4>
+                            <ul id="detail-recommendations"></ul>
+                        </div>
+                        <div class="detail-required">
+                            <h4>🎯 目標達成のための条件</h4>
+                            <div id="detail-requirements"></div>
+                        </div>
+                    </div>
+                    <button id="close-age-details" class="close-btn">×</button>
                 </div>
             </section>
 
@@ -80,6 +208,8 @@
                             <option value="expense-change">支出の変化</option>
                             <option value="one-time-income">一時的な収入</option>
                             <option value="one-time-expense">一時的な支出</option>
+                            <option value="job-start" class="student-option" style="display: none;">就職開始</option>
+                            <option value="scholarship-start" class="student-option" style="display: none;">奨学金返済開始</option>
                         </select>
                     </div>
                     
