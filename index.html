@@ -119,7 +119,7 @@
                     
                     <div class="form-group student-only" style="display: none;">
                         <label for="graduation-age">卒業予定年齢</label>
-                        <input type="number" id="graduation-age" min="20" max="30" value="22">
+                        <input type="number" id="graduation-age" min="20" max="35" value="22">
                         <span class="unit">歳</span>
                     </div>
                     
@@ -139,6 +139,11 @@
                         <label for="scholarship-years">返済期間</label>
                         <input type="number" id="scholarship-years" min="1" max="20" value="15">
                         <span class="unit">年</span>
+                    </div>
+                    
+                    <div class="calculation-note">
+                        <p>💡 <strong>収入は自動計算されます</strong></p>
+                        <p>あなたのやりたいことから必要な収入を逆算して表示します</p>
                     </div>
                 </form>
 
@@ -185,44 +190,76 @@
                         <div class="goal-category">
                             <h4>🏠 住まい（東京エリア）</h4>
                             <div class="goal-options">
-                                <label class="checkbox-label">
-                                    <input type="checkbox" name="goals" value="tokyo-center" data-cost="150000000" data-age="35">
-                                    <span>都心に家を購入 (1.5億円)</span>
-                                </label>
-                                <label class="checkbox-label">
-                                    <input type="checkbox" name="goals" value="tokyo-premium" data-cost="100000000" data-age="32">
-                                    <span>首都圏高級エリアに購入 (1億円)</span>
-                                </label>
-                                <label class="checkbox-label">
-                                    <input type="checkbox" name="goals" value="tokyo-suburbs" data-cost="80000000" data-age="30">
-                                    <span>郊外に購入 (8000万円)</span>
-                                </label>
-                                <label class="checkbox-label">
-                                    <input type="checkbox" name="goals" value="tokyo-distant" data-cost="30000000" data-age="28">
-                                    <span>少し遠めに購入 (3000万円)</span>
-                                </label>
-                                <label class="checkbox-label">
-                                    <input type="checkbox" name="goals" value="renovation" data-cost="8000000" data-age="40">
-                                    <span>住宅リフォーム (800万円)</span>
-                                </label>
+                                <div class="goal-with-age">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="goals" value="tokyo-center" data-cost="150000000">
+                                        <span>都心に家を購入 (1.5億円)</span>
+                                    </label>
+                                    <input type="number" class="goal-age-input" data-goal="tokyo-center" min="25" max="70" value="40" placeholder="年齢">
+                                    <span class="age-unit">歳で</span>
+                                </div>
+                                <div class="goal-with-age">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="goals" value="tokyo-premium" data-cost="100000000">
+                                        <span>首都圏高級エリアに購入 (1億円)</span>
+                                    </label>
+                                    <input type="number" class="goal-age-input" data-goal="tokyo-premium" min="25" max="70" value="35" placeholder="年齢">
+                                    <span class="age-unit">歳で</span>
+                                </div>
+                                <div class="goal-with-age">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="goals" value="tokyo-suburbs" data-cost="80000000">
+                                        <span>郊外に購入 (8000万円)</span>
+                                    </label>
+                                    <input type="number" class="goal-age-input" data-goal="tokyo-suburbs" min="25" max="70" value="32" placeholder="年齢">
+                                    <span class="age-unit">歳で</span>
+                                </div>
+                                <div class="goal-with-age">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="goals" value="tokyo-distant" data-cost="30000000">
+                                        <span>少し遠めに購入 (3000万円)</span>
+                                    </label>
+                                    <input type="number" class="goal-age-input" data-goal="tokyo-distant" min="25" max="70" value="30" placeholder="年齢">
+                                    <span class="age-unit">歳で</span>
+                                </div>
+                                <div class="goal-with-age">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="goals" value="renovation" data-cost="8000000">
+                                        <span>住宅リフォーム (800万円)</span>
+                                    </label>
+                                    <input type="number" class="goal-age-input" data-goal="renovation" min="30" max="70" value="45" placeholder="年齢">
+                                    <span class="age-unit">歳で</span>
+                                </div>
                             </div>
                         </div>
 
                         <div class="goal-category">
                             <h4>🚗 車・移動</h4>
                             <div class="goal-options">
-                                <label class="checkbox-label">
-                                    <input type="checkbox" name="goals" value="car-new" data-cost="4000000" data-age="25">
-                                    <span>新車購入 (400万円)</span>
-                                </label>
-                                <label class="checkbox-label">
-                                    <input type="checkbox" name="goals" value="car-premium" data-cost="8000000" data-age="30">
-                                    <span>プレミアム車購入 (800万円)</span>
-                                </label>
-                                <label class="checkbox-label">
-                                    <input type="checkbox" name="goals" value="car-luxury" data-cost="15000000" data-age="35">
-                                    <span>高級車購入 (1500万円)</span>
-                                </label>
+                                <div class="goal-with-age">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="goals" value="car-new" data-cost="4000000">
+                                        <span>新車購入 (400万円)</span>
+                                    </label>
+                                    <input type="number" class="goal-age-input" data-goal="car-new" min="20" max="70" value="25" placeholder="年齢">
+                                    <span class="age-unit">歳で</span>
+                                </div>
+                                <div class="goal-with-age">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="goals" value="car-premium" data-cost="8000000">
+                                        <span>プレミアム車購入 (800万円)</span>
+                                    </label>
+                                    <input type="number" class="goal-age-input" data-goal="car-premium" min="20" max="70" value="30" placeholder="年齢">
+                                    <span class="age-unit">歳で</span>
+                                </div>
+                                <div class="goal-with-age">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="goals" value="car-luxury" data-cost="15000000">
+                                        <span>高級車購入 (1500万円)</span>
+                                    </label>
+                                    <input type="number" class="goal-age-input" data-goal="car-luxury" min="30" max="70" value="40" placeholder="年齢">
+                                    <span class="age-unit">歳で</span>
+                                </div>
                                 <label class="checkbox-label">
                                     <input type="checkbox" name="goals" value="car-replacement" data-cost="4000000" data-recurring="true">
                                     <span>車の定期買い替え (10年毎400万円)</span>
@@ -233,10 +270,14 @@
                         <div class="goal-category">
                             <h4>✈️ 旅行・体験</h4>
                             <div class="goal-options">
-                                <label class="checkbox-label">
-                                    <input type="checkbox" name="goals" value="world-trip" data-cost="3000000" data-age="30">
-                                    <span>世界一周旅行 (300万円)</span>
-                                </label>
+                                <div class="goal-with-age">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="goals" value="world-trip" data-cost="3000000">
+                                        <span>世界一周旅行 (300万円)</span>
+                                    </label>
+                                    <input type="number" class="goal-age-input" data-goal="world-trip" min="20" max="70" value="30" placeholder="年齢">
+                                    <span class="age-unit">歳で</span>
+                                </div>
                                 <label class="checkbox-label">
                                     <input type="checkbox" name="goals" value="annual-travel-basic" data-cost="300000" data-recurring="true">
                                     <span>毎年の国内旅行 (年30万円)</span>
@@ -245,10 +286,14 @@
                                     <input type="checkbox" name="goals" value="annual-travel-premium" data-cost="800000" data-recurring="true">
                                     <span>毎年の海外旅行 (年80万円)</span>
                                 </label>
-                                <label class="checkbox-label">
-                                    <input type="checkbox" name="goals" value="luxury-travel" data-cost="5000000" data-age="40">
-                                    <span>贅沢な記念旅行 (500万円)</span>
-                                </label>
+                                <div class="goal-with-age">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="goals" value="luxury-travel" data-cost="5000000">
+                                        <span>贅沢な記念旅行 (500万円)</span>
+                                    </label>
+                                    <input type="number" class="goal-age-input" data-goal="luxury-travel" min="25" max="70" value="40" placeholder="年齢">
+                                    <span class="age-unit">歳で</span>
+                                </div>
                             </div>
                         </div>
 
@@ -308,6 +353,10 @@
                             <h3>🎯 目標達成に必要な月収入</h3>
                             <div class="result-value" id="required-monthly-income">¥0</div>
                             <p class="result-note">手取り額（税引き後）</p>
+                            <div class="deviation-info" id="deviation-info" style="display: none;">
+                                <div class="deviation-score">偏差値: <span id="deviation-score">--</span></div>
+                                <div class="deviation-rank">上位<span id="deviation-rank">--</span>%</div>
+                            </div>
                         </div>
                         
                         <div class="result-breakdown">
@@ -336,7 +385,12 @@
                     </div>
                     
                     <div class="timeline-section">
-                        <h4>📅 ライフイベント タイムライン</h4>
+                        <h4>📅 年齢別必要収入 タイムライン</h4>
+                        <div id="income-timeline" class="income-timeline"></div>
+                    </div>
+                    
+                    <div class="timeline-section">
+                        <h4>🎯 ライフイベント予定</h4>
                         <div id="life-timeline" class="life-timeline"></div>
                     </div>
                     

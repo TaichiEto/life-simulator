@@ -7,11 +7,8 @@ class LifeSimulator {
             userType: 'working',
             currentAge: 20,
             currentSavings: 100000,
-            monthlyIncome: 80000,
-            monthlyExpense: 70000,
             retireAge: 65,
             graduationAge: 22,
-            startingSalary: 250000,
             scholarshipDebt: 0,
             scholarshipInterest: 0.3,
             scholarshipYears: 15,
@@ -92,8 +89,7 @@ class LifeSimulator {
         inputs.forEach(input => {
             input.addEventListener('input', () => {
                 this.updateBasicInfo();
-                this.updateSummaryCards();
-                this.updateChart();
+                this.calculateScholarshipPayment();
                 this.saveDataToStorage();
             });
         });
@@ -111,6 +107,15 @@ class LifeSimulator {
         const goalCheckboxes = document.querySelectorAll('input[name="goals"]');
         goalCheckboxes.forEach(checkbox => {
             checkbox.addEventListener('change', () => {
+                this.updateLifeGoals();
+                this.saveDataToStorage();
+            });
+        });
+        
+        // 年齢入力フィールドのイベントリスナー
+        const goalAgeInputs = document.querySelectorAll('.goal-age-input');
+        goalAgeInputs.forEach(input => {
+            input.addEventListener('input', () => {
                 this.updateLifeGoals();
                 this.saveDataToStorage();
             });
@@ -136,22 +141,34 @@ class LifeSimulator {
         }
         
         // 年齢詳細パネルの閉じるボタン
-        document.getElementById('close-age-details').addEventListener('click', () => {
-            document.getElementById('age-details').style.display = 'none';
-        });
+        const closeAgeDetailsBtn = document.getElementById('close-age-details');
+        if (closeAgeDetailsBtn) {
+            closeAgeDetailsBtn.addEventListener('click', () => {
+                document.getElementById('age-details').style.display = 'none';
+            });
+        }
         
         // チュートリアル関連のイベント
-        document.getElementById('show-tutorial').addEventListener('click', () => {
-            this.showTutorial();
-        });
+        const showTutorialBtn = document.getElementById('show-tutorial');
+        if (showTutorialBtn) {
+            showTutorialBtn.addEventListener('click', () => {
+                this.showTutorial();
+            });
+        }
         
-        document.getElementById('start-tutorial').addEventListener('click', () => {
-            this.startTutorial();
-        });
+        const startTutorialBtn = document.getElementById('start-tutorial');
+        if (startTutorialBtn) {
+            startTutorialBtn.addEventListener('click', () => {
+                this.startTutorial();
+            });
+        }
         
-        document.getElementById('skip-tutorial').addEventListener('click', () => {
-            this.skipTutorial();
-        });
+        const skipTutorialBtn = document.getElementById('skip-tutorial');
+        if (skipTutorialBtn) {
+            skipTutorialBtn.addEventListener('click', () => {
+                this.skipTutorial();
+            });
+        }
         
         // 計算実行ボタン
         document.getElementById('calculate-btn').addEventListener('click', () => {
@@ -169,13 +186,19 @@ class LifeSimulator {
         });
 
         // チャートタブ切り替え
-        document.getElementById('asset-chart-tab').addEventListener('click', () => {
-            this.switchChartTab('asset');
-        });
+        const assetChartTab = document.getElementById('asset-chart-tab');
+        if (assetChartTab) {
+            assetChartTab.addEventListener('click', () => {
+                this.switchChartTab('asset');
+            });
+        }
         
-        document.getElementById('expense-chart-tab').addEventListener('click', () => {
-            this.switchChartTab('expense');
-        });
+        const expenseChartTab = document.getElementById('expense-chart-tab');
+        if (expenseChartTab) {
+            expenseChartTab.addEventListener('click', () => {
+                this.switchChartTab('expense');
+            });
+        }
 
         // 古いイベント管理UI（現在は非表示）
         const addEventBtn = document.getElementById('add-event-btn');
@@ -285,10 +308,18 @@ class LifeSimulator {
         const checkedGoals = document.querySelectorAll('input[name="goals"]:checked');
         
         checkedGoals.forEach(checkbox => {
+            let age = parseInt(checkbox.dataset.age) || this.basicInfo.currentAge + 5;
+            
+            // 年齢入力フィールドがある場合はそちらを優先
+            const ageInput = document.querySelector(`.goal-age-input[data-goal="${checkbox.value}"]`);
+            if (ageInput && ageInput.value) {
+                age = parseInt(ageInput.value);
+            }
+            
             const goal = {
                 id: checkbox.value,
                 cost: parseInt(checkbox.dataset.cost) || 0,
-                age: parseInt(checkbox.dataset.age) || this.basicInfo.currentAge + 5,
+                age: age,
                 recurring: checkbox.dataset.recurring === 'true',
                 retireAge: parseInt(checkbox.dataset.retireAge) || null
             };
@@ -400,15 +431,33 @@ class LifeSimulator {
         this.updateFamilyPlan();
         this.updateLifeGoals();
         
-        // 基本生活費（東京基準）
-        const basicLivingCost = 250000; // 月額基本生活費（東京）
+        // 基本生活費（現実的な基準）
+        let basicLivingCost = 150000; // 月額基本生活費（一人暮らし：家賃7万+生活費8万）
         
-        // 家族関連費用計算
+        // 家族の人数に応じて生活費を調整
+        let familySize = 1; // 本人
+        if (this.familyPlan.marriageAge) {
+            familySize += 1; // 配偶者
+        }
+        familySize += this.familyPlan.childrenCount; // 子ども
+        
+        // 家族が増えるごとに生活費増加（規模の経済を考慮）
+        if (familySize === 2) {
+            basicLivingCost = 220000; // 夫婦：+7万円
+        } else if (familySize === 3) {
+            basicLivingCost = 280000; // 夫婦+子1人：+13万円
+        } else if (familySize === 4) {
+            basicLivingCost = 330000; // 夫婦+子2人：+18万円
+        } else if (familySize >= 5) {
+            basicLivingCost = 350000 + (familySize - 4) * 30000; // 5人以上：1人あたり+3万円
+        }
+        
+        // 家族関連費用計算（より現実的に）
         let totalFamilyCost = 0;
         const educationCosts = {
-            public: { total: 8000000 },  // 小中高大の総額
-            private: { total: 20000000 },
-            mixed: { total: 14000000 }
+            public: { total: 5000000 },  // 小中高大の総額（公立中心）
+            private: { total: 12000000 }, // 私立中心
+            mixed: { total: 8000000 }     // 混合
         };
         
         this.familyPlan.children.forEach(child => {
@@ -416,59 +465,78 @@ class LifeSimulator {
             let childCost = costs.total;
             
             if (child.highEducation) {
-                childCost += 2000000; // 大学院費用
+                childCost += 1500000; // 大学院費用
             }
             
-            childCost += 3000000; // 基本養育費
+            childCost += 2000000; // 基本養育費（より現実的に）
             totalFamilyCost += childCost;
         });
         
-        // ライフゴール費用計算
+        // ライフゴール費用計算（住宅ローン考慮）
         let totalGoalsCost = 0;
         let recurringGoalsCost = 0;
+        let housingLoanPayment = 0;
         
         this.lifeGoals.forEach(goal => {
             if (goal.recurring) {
-                // 毎年の費用
-                const yearsUntilRetire = Math.max(1, this.basicInfo.retireAge - this.basicInfo.currentAge);
-                recurringGoalsCost += (goal.cost * yearsUntilRetire) / 12; // 月額換算
+                // 毎年の費用（月額に分散）
+                recurringGoalsCost += goal.cost / 12;
             } else {
-                // 一時的な費用
-                totalGoalsCost += goal.cost;
+                // 住宅関連の場合はローン計算
+                if (goal.id.includes('tokyo-') || goal.id === 'renovation') {
+                    const loanAmount = this.calculateHousingLoan(goal);
+                    housingLoanPayment += loanAmount.monthlyPayment;
+                    totalGoalsCost += loanAmount.downPayment;
+                } else {
+                    // その他の一時的な費用
+                    totalGoalsCost += goal.cost;
+                }
             }
         });
         
         // 奨学金返済
         const scholarshipCost = this.basicInfo.scholarshipMonthly;
         
-        // リタイア資金（推定3000万円）
-        const targetRetirementFund = 30000000;
+        // リタイア資金（より現実的な目標）
+        const targetRetirementFund = 20000000; // 2000万円に調整
         const yearsUntilRetire = Math.max(1, this.basicInfo.retireAge - this.basicInfo.currentAge);
-        const monthlyRetirementSaving = (targetRetirementFund - this.basicInfo.currentSavings) / (yearsUntilRetire * 12);
+        const monthlyRetirementSaving = Math.max(0, (targetRetirementFund - this.basicInfo.currentSavings) / (yearsUntilRetire * 12));
         
         // 配偶者収入
         const spouseIncome = this.familyPlan.marriageAge ? this.familyPlan.spouseIncome : 0;
         
-        // 月額計算
-        const monthlyFamilyCost = totalFamilyCost / (yearsUntilRetire * 12);
-        const monthlyGoalsCost = totalGoalsCost / (yearsUntilRetire * 12);
+        // ライフゴールの費用を長期間で分散（10-20年）
+        const goalDistributionYears = Math.min(20, yearsUntilRetire);
+        const monthlyGoalsCost = totalGoalsCost / (goalDistributionYears * 12);
         
-        const totalRequiredIncome = basicLivingCost + monthlyFamilyCost + monthlyGoalsCost + 
-                                   recurringGoalsCost + scholarshipCost + monthlyRetirementSaving - spouseIncome;
+        // 家族費用も長期間で分散
+        const familyDistributionYears = Math.min(25, yearsUntilRetire);
+        const monthlyFamilyCost = totalFamilyCost / (familyDistributionYears * 12);
+        
+        // 結婚による生活費増加（家賃や食費など）
+        const marriageExtraCost = this.familyPlan.marriageAge ? 30000 : 0;
+        
+        const totalRequiredIncome = basicLivingCost + marriageExtraCost + monthlyFamilyCost + monthlyGoalsCost + 
+                                   recurringGoalsCost + scholarshipCost + monthlyRetirementSaving + housingLoanPayment - spouseIncome;
+        
+        // 最低限の生活費を下回らないように調整
+        const minimumIncome = 180000; // 最低月収18万円（実家暮らし等考慮）
+        const finalRequiredIncome = Math.max(minimumIncome, totalRequiredIncome);
         
         // 結果表示
         this.displayCalculationResults({
-            requiredIncome: Math.max(0, totalRequiredIncome),
-            basicLiving: basicLivingCost,
+            requiredIncome: finalRequiredIncome,
+            basicLiving: basicLivingCost + marriageExtraCost,
             familyCost: monthlyFamilyCost,
-            goalsCost: monthlyGoalsCost + recurringGoalsCost,
+            goalsCost: monthlyGoalsCost + recurringGoalsCost + housingLoanPayment,
             scholarshipCost: scholarshipCost,
             retirementSavings: monthlyRetirementSaving,
             spouseIncome: spouseIncome
         });
         
         this.generateTimeline();
-        this.generateAdvice(totalRequiredIncome);
+        this.generateIncomeTimeline(finalRequiredIncome);
+        this.generateAdvice(finalRequiredIncome);
         
         // 結果が出たらボタン表示
         document.getElementById('export-plan-btn').style.display = 'inline-block';
@@ -497,11 +565,11 @@ class LifeSimulator {
             this.basicInfo.scholarshipMonthly = Math.round(monthlyPayment);
         }
         
-        document.getElementById('calculated-monthly-payment').textContent = 
-            '¥' + this.formatNumber(this.basicInfo.scholarshipMonthly);
+        const paymentElement = document.getElementById('calculated-monthly-payment');
+        if (paymentElement) {
+            paymentElement.textContent = '¥' + this.formatNumber(this.basicInfo.scholarshipMonthly);
+        }
         
-        this.updateSummaryCards();
-        this.updateChart();
         this.calculateRequiredIncome();
         this.saveDataToStorage();
     }
@@ -524,6 +592,20 @@ class LifeSimulator {
         
         document.getElementById('retirement-savings').textContent = 
             '¥' + this.formatNumber(Math.round(results.retirementSavings));
+        
+        // 偏差値表示
+        const annualIncome = results.requiredIncome * 12;
+        const salaryAnalysis = this.calculateSalaryDeviation(annualIncome, this.basicInfo.currentAge);
+        
+        const deviationInfo = document.getElementById('deviation-info');
+        const deviationScore = document.getElementById('deviation-score');
+        const deviationRank = document.getElementById('deviation-rank');
+        
+        if (deviationInfo && deviationScore && deviationRank) {
+            deviationScore.textContent = salaryAnalysis.deviation.toFixed(1);
+            deviationRank.textContent = salaryAnalysis.percentileRank.toFixed(1);
+            deviationInfo.style.display = 'flex';
+        }
     }
 
     generateTimeline() {
@@ -601,6 +683,87 @@ class LifeSimulator {
         `).join('');
     }
 
+    // 年齢別必要収入タイムラインの生成
+    generateIncomeTimeline(baseRequiredIncome) {
+        const incomeTimeline = document.getElementById('income-timeline');
+        const incomeStages = [];
+        
+        // 現在から5-10年刻みで必要収入を計算（大学生の場合は卒業後から）
+        const startAge = this.basicInfo.userType === 'student' ? this.basicInfo.graduationAge : this.basicInfo.currentAge;
+        const ageSteps = [startAge, 25, 30, 35, 40, 45, 50, 55, this.basicInfo.retireAge];
+        const uniqueAges = [...new Set(ageSteps)].filter(age => age >= startAge && age <= this.basicInfo.retireAge).sort((a, b) => a - b);
+        
+        uniqueAges.forEach(targetAge => {
+            const ageData = this.salaryDatabase.byAge[this.getClosestAgeKey(targetAge)];
+            const averageIncome = ageData ? ageData.average : 4000000;
+            
+            // より現実的な年収計算
+            let recommendedAnnualIncome;
+            
+            if (targetAge <= 25) {
+                // 新卒〜25歳：基本必要額または平均の8割
+                recommendedAnnualIncome = Math.max(baseRequiredIncome * 12, averageIncome * 0.8);
+            } else if (targetAge <= 35) {
+                // 26-35歳：基本必要額または平均
+                recommendedAnnualIncome = Math.max(baseRequiredIncome * 12, averageIncome);
+            } else if (targetAge <= 50) {
+                // 36-50歳：基本必要額の1.1倍または平均の1.1倍
+                recommendedAnnualIncome = Math.max(baseRequiredIncome * 12 * 1.1, averageIncome * 1.1);
+            } else {
+                // 51歳以上：基本必要額の1.2倍または平均の1.2倍
+                recommendedAnnualIncome = Math.max(baseRequiredIncome * 12 * 1.2, averageIncome * 1.2);
+            }
+            
+            // 上限設定（現実的な範囲に制限）
+            const maxReasonableIncome = averageIncome * 2; // 平均の2倍まで
+            recommendedAnnualIncome = Math.min(recommendedAnnualIncome, maxReasonableIncome);
+            
+            // 偏差値計算
+            const salaryAnalysis = this.calculateSalaryDeviation(recommendedAnnualIncome, targetAge);
+            
+            // 大学生の場合の頑張り度（年齢も渡す）
+            let effortLevel = null;
+            if (this.basicInfo.userType === 'student' && targetAge <= Math.max(30, this.basicInfo.graduationAge + 6)) {
+                effortLevel = this.calculateStudentEffortLevel(recommendedAnnualIncome, targetAge);
+            } else if (targetAge > 30 || targetAge > this.basicInfo.graduationAge + 6) {
+                // 30歳以上または卒業後6年以上は一般的な評価
+                effortLevel = this.calculateStudentEffortLevel(recommendedAnnualIncome, targetAge);
+            }
+            
+            incomeStages.push({
+                age: targetAge,
+                monthlyIncome: Math.round(recommendedAnnualIncome / 12),
+                annualIncome: Math.round(recommendedAnnualIncome),
+                deviation: salaryAnalysis.deviation,
+                percentileRank: salaryAnalysis.percentileRank,
+                effortLevel: effortLevel
+            });
+        });
+        
+        // タイムライン表示
+        incomeTimeline.innerHTML = incomeStages.map(stage => `
+            <div class="income-timeline-item">
+                <div class="income-age">${stage.age}歳</div>
+                <div class="income-details">
+                    <div class="income-amount">
+                        月収 <strong>¥${this.formatNumber(stage.monthlyIncome)}</strong>
+                        <span class="annual-income">(年収 ¥${this.formatNumber(stage.annualIncome)})</span>
+                    </div>
+                    <div class="income-stats">
+                        偏差値 <span class="deviation-score">${stage.deviation.toFixed(1)}</span> 
+                        / 上位<span class="percentile-rank">${stage.percentileRank.toFixed(1)}%</span>
+                    </div>
+                    ${stage.effortLevel ? `
+                        <div class="effort-level">
+                            <span class="effort-badge">${stage.effortLevel.level}</span>
+                            <span class="effort-description">${stage.effortLevel.description}</span>
+                        </div>
+                    ` : ''}
+                </div>
+            </div>
+        `).join('');
+    }
+
     generateAdvice(requiredIncome) {
         const adviceContainer = document.getElementById('calculation-advice');
         const annualIncome = requiredIncome * 12; // 年収換算
@@ -615,7 +778,7 @@ class LifeSimulator {
         advice.push(`📊 同年代平均: ¥${this.formatNumber(salaryAnalysis.ageAverage)} / 全国平均: ¥${this.formatNumber(this.salaryDatabase.percentiles.top50)}`);
         
         if (this.basicInfo.userType === 'student') {
-            const effortLevel = this.calculateStudentEffortLevel(annualIncome);
+            const effortLevel = this.calculateStudentEffortLevel(annualIncome, this.basicInfo.graduationAge);
             advice.push(`🎓 <strong>大学生の就活・起業頑張り度: ${effortLevel.level}</strong>`);
             advice.push(`${effortLevel.description}`);
             advice.push(`💪 ${effortLevel.actionPlan}`);
@@ -691,42 +854,143 @@ class LifeSimulator {
         return sign * y;
     }
 
-    // 大学生の努力レベル計算
-    calculateStudentEffortLevel(targetAnnualIncome) {
-        const levels = [
-            {
-                threshold: 3000000,
-                level: "⭐ 標準レベル",
-                description: "一般的な就活で達成可能な年収です",
-                actionPlan: "基本的な就活準備（ES、面接対策）をしっかりと行いましょう"
-            },
-            {
-                threshold: 5000000,
-                level: "⭐⭐ 頑張りレベル",
-                description: "大手企業・人気業界を目指す年収です",
-                actionPlan: "インターン参加、資格取得、語学力向上に取り組みましょう"
-            },
-            {
-                threshold: 7000000,
-                level: "⭐⭐⭐ 超頑張りレベル",
-                description: "外資系・コンサル・IT大手レベルの年収です",
-                actionPlan: "海外経験、難関資格、プログラミング技術など特別なスキルが必要です"
-            },
-            {
-                threshold: 10000000,
-                level: "⭐⭐⭐⭐ 起業・特殊技能レベル",
-                description: "起業または超高度な専門技術が必要な年収です",
-                actionPlan: "起業準備、AI・ブロックチェーンなど最先端技術習得、または医師・弁護士等の資格取得"
-            },
-            {
-                threshold: Infinity,
-                level: "⭐⭐⭐⭐⭐ レジェンドレベル",
-                description: "上位0.1%の超高収入です",
-                actionPlan: "成功した起業・投資、または芸能・スポーツ等での成功が必要です"
-            }
-        ];
+    // 大学生の努力レベル計算（年齢も考慮）
+    calculateStudentEffortLevel(targetAnnualIncome, age = 25) {
+        // 50歳で630万円は普通なので、年齢に応じて基準を調整
+        let adjustedThresholds;
         
-        return levels.find(level => targetAnnualIncome <= level.threshold);
+        // 大学生の場合は卒業年齢を考慮
+        const evaluationAge = this.basicInfo.userType === 'student' ? Math.max(age, this.basicInfo.graduationAge) : age;
+        
+        if (evaluationAge <= 30) {
+            // 新卒〜30歳：厳しめの基準
+            adjustedThresholds = [
+                {
+                    threshold: 3500000,
+                    level: "⭐ 標準レベル",
+                    description: "一般的な就活で達成可能な年収です",
+                    actionPlan: "基本的な就活準備（ES、面接対策）をしっかりと行いましょう"
+                },
+                {
+                    threshold: 6000000,
+                    level: "⭐⭐ 頑張りレベル",
+                    description: "大手企業・人気業界を目指す年収です",
+                    actionPlan: "インターン参加、資格取得、語学力向上に取り組みましょう"
+                },
+                {
+                    threshold: 9000000,
+                    level: "⭐⭐⭐ 超頑張りレベル",
+                    description: "外資系・コンサル・IT大手レベルの年収です",
+                    actionPlan: "海外経験、難関資格、プログラミング技術など特別なスキルが必要です"
+                },
+                {
+                    threshold: 15000000,
+                    level: "⭐⭐⭐⭐ 起業・特殊技能レベル",
+                    description: "起業または超高度な専門技術が必要な年収です",
+                    actionPlan: "起業準備、AI・ブロックチェーンなど最先端技術習得、または医師・弁護士等の資格取得"
+                },
+                {
+                    threshold: Infinity,
+                    level: "⭐⭐⭐⭐⭐ レジェンドレベル",
+                    description: "上位0.1%の超高収入です",
+                    actionPlan: "成功した起業・投資、または芸能・スポーツ等での成功が必要です"
+                }
+            ];
+        } else {
+            // 30歳以上：年齢に応じて基準を緩和
+            const ageFactor = Math.min(2.0, (evaluationAge - 25) / 25 + 1); // 25歳を基準に最大2倍まで
+            adjustedThresholds = [
+                {
+                    threshold: 3500000 * ageFactor,
+                    level: "⭐ 標準レベル",
+                    description: "年齢相応の標準的な年収です",
+                    actionPlan: "安定したキャリア形成ができています"
+                },
+                {
+                    threshold: 6000000 * ageFactor,
+                    level: "⭐⭐ 良好レベル",
+                    description: "年齢に対して良好な年収です",
+                    actionPlan: "順調なキャリアアップができています"
+                },
+                {
+                    threshold: 9000000 * ageFactor,
+                    level: "⭐⭐⭐ 優秀レベル",
+                    description: "同年代の中で優秀な年収です",
+                    actionPlan: "管理職や専門職として活躍されています"
+                },
+                {
+                    threshold: 15000000 * ageFactor,
+                    level: "⭐⭐⭐⭐ エグゼクティブレベル",
+                    description: "経営層や高度専門職レベルの年収です",
+                    actionPlan: "企業の中核を担うポジションです"
+                },
+                {
+                    threshold: Infinity,
+                    level: "⭐⭐⭐⭐⭐ トップレベル",
+                    description: "業界トップクラスの年収です",
+                    actionPlan: "経営者や特別な才能での成功です"
+                }
+            ];
+        }
+        
+        return adjustedThresholds.find(level => targetAnnualIncome <= level.threshold);
+    }
+
+    // 住宅ローン計算
+    calculateHousingLoan(goal) {
+        // 推定年収を計算（現在の必要収入の1.2倍程度）
+        const estimatedAnnualIncome = this.calculateEstimatedIncome(goal.age);
+        
+        // 年収の5倍までがローン上限
+        const maxLoanAmount = estimatedAnnualIncome * 5;
+        
+        // 物件価格
+        const propertyPrice = goal.cost;
+        
+        // ローン額（物件価格の80%程度、ただし年収5倍以内）
+        const loanAmount = Math.min(propertyPrice * 0.8, maxLoanAmount);
+        
+        // 頭金
+        const downPayment = propertyPrice - loanAmount;
+        
+        // 月々の返済額計算（35年ローン、金利1.5%と仮定）
+        const loanYears = 35;
+        const annualRate = 0.015;
+        const monthlyRate = annualRate / 12;
+        const totalMonths = loanYears * 12;
+        
+        let monthlyPayment = 0;
+        if (loanAmount > 0) {
+            monthlyPayment = loanAmount * (monthlyRate * Math.pow(1 + monthlyRate, totalMonths)) / 
+                           (Math.pow(1 + monthlyRate, totalMonths) - 1);
+        }
+        
+        return {
+            loanAmount: loanAmount,
+            downPayment: downPayment,
+            monthlyPayment: Math.round(monthlyPayment),
+            maxLoanAmount: maxLoanAmount,
+            isAffordable: loanAmount >= propertyPrice * 0.7 // 70%以上ローンできれば実現可能
+        };
+    }
+
+    // その年齢での推定年収計算
+    calculateEstimatedIncome(age) {
+        const ageData = this.salaryDatabase.byAge[this.getClosestAgeKey(age)];
+        let baseIncome = ageData ? ageData.average : 4000000;
+        
+        // 年齢に応じた調整
+        if (age <= 25) {
+            baseIncome *= 0.8;
+        } else if (age <= 35) {
+            baseIncome *= 1.0;
+        } else if (age <= 50) {
+            baseIncome *= 1.2;
+        } else {
+            baseIncome *= 1.3;
+        }
+        
+        return baseIncome;
     }
 
     exportPlan() {
@@ -906,8 +1170,11 @@ class LifeSimulator {
         const incomes = [];
         const savings = [];
         
-        let currentMonthlyIncome = this.basicInfo.monthlyIncome;
-        let currentMonthlyExpense = this.basicInfo.monthlyExpense;
+        // 基本生活費から開始
+        let currentMonthlyExpense = 150000;
+        // 年齢に応じた理想収入から開始
+        const startingAgeData = this.salaryDatabase.byAge[this.getClosestAgeKey(this.basicInfo.currentAge)];
+        let currentMonthlyIncome = startingAgeData ? startingAgeData.average / 12 : 300000;
         
         for (let age = this.basicInfo.currentAge; age <= 80; age++) {
             ages.push(age);
@@ -919,7 +1186,8 @@ class LifeSimulator {
             
             // 大学生の就職による収入変化
             if (this.basicInfo.userType === 'student' && age === this.basicInfo.graduationAge) {
-                currentMonthlyIncome = this.basicInfo.startingSalary;
+                // 新卒の平均初任給を使用
+                currentMonthlyIncome = 250000;
                 currentMonthlyExpense += this.basicInfo.scholarshipMonthly;
             }
             
@@ -1026,15 +1294,19 @@ class LifeSimulator {
         const assets = [];
         
         let currentAsset = this.basicInfo.currentSavings;
-        let currentMonthlyIncome = this.basicInfo.monthlyIncome;
-        let currentMonthlyExpense = this.basicInfo.monthlyExpense;
+        // 基本生活費（東京基準）
+        let currentMonthlyExpense = 150000;
+        // 年齢に応じた理想収入から開始
+        const startingAgeData = this.salaryDatabase.byAge[this.getClosestAgeKey(this.basicInfo.currentAge)];
+        let currentMonthlyIncome = startingAgeData ? startingAgeData.average / 12 : 300000;
         
         for (let age = this.basicInfo.currentAge; age <= 80; age++) {
             ages.push(age);
             
             // 大学生の就職による収入変化
             if (this.basicInfo.userType === 'student' && age === this.basicInfo.graduationAge) {
-                currentMonthlyIncome = this.basicInfo.startingSalary;
+                // 新卒の平均初任給を使用
+                currentMonthlyIncome = 250000;
                 currentMonthlyExpense += this.basicInfo.scholarshipMonthly;
             }
             
@@ -1393,8 +1665,11 @@ class LifeSimulator {
 
     calculateAgeSpecificData(targetAge) {
         let currentAsset = this.basicInfo.currentSavings;
-        let currentMonthlyIncome = this.basicInfo.monthlyIncome;
-        let currentMonthlyExpense = this.basicInfo.monthlyExpense;
+        // 基本生活費から開始
+        let currentMonthlyExpense = 150000;
+        // 年齢に応じた理想収入から開始
+        const startingAgeData = this.salaryDatabase.byAge[this.getClosestAgeKey(this.basicInfo.currentAge)];
+        let currentMonthlyIncome = startingAgeData ? startingAgeData.average / 12 : 300000;
         
         for (let age = this.basicInfo.currentAge; age <= targetAge; age++) {
             // 大学生の就職による変化
@@ -1488,12 +1763,22 @@ class LifeSimulator {
         return recommendations;
     }
 
-    generateRequirements(age, ageData) {
+    generateRequirements(age, ageData, idealData) {
         const annualBalance = (ageData.monthlyIncome - ageData.monthlyExpense) * 12;
         const yearsToRetire = Math.max(0, this.basicInfo.retireAge - age);
         const targetRetirementAssets = 30000000; // 目標リタイア資産
         
-        let requirements = `<p><strong>安定した生活のために：</strong></p>`;
+        let requirements = `<p><strong>💰 この年齢での理想的な状況：</strong></p>`;
+        
+        if (idealData) {
+            const salaryGap = idealData.idealMonthlyIncome - ageData.monthlyIncome;
+            const savingsGap = idealData.idealTotalSavings - ageData.assets;
+            
+            requirements += `<p>・理想年収との差: <strong style="color: ${salaryGap <= 0 ? '#27ae60' : '#e74c3c'}">¥${this.formatNumber(Math.abs(salaryGap * 12))}</strong> ${salaryGap <= 0 ? '（達成済み✅）' : '（要改善）'}</p>`;
+            requirements += `<p>・理想貯蓄額との差: <strong style="color: ${savingsGap <= 0 ? '#27ae60' : '#e74c3c'}">¥${this.formatNumber(Math.abs(savingsGap))}</strong> ${savingsGap <= 0 ? '（達成済み✅）' : '（要改善）'}</p>`;
+        }
+        
+        requirements += `<p><strong>🎯 リタイア資金の準備：</strong></p>`;
         
         if (age < this.basicInfo.retireAge) {
             const requiredAnnualSaving = yearsToRetire > 0 ? 
@@ -1752,11 +2037,8 @@ class LifeSimulator {
                 userType: 'working',
                 currentAge: 20,
                 currentSavings: 100000,
-                monthlyIncome: 80000,
-                monthlyExpense: 70000,
                 retireAge: 65,
                 graduationAge: 22,
-                startingSalary: 250000,
                 scholarshipDebt: 0,
                 scholarshipInterest: 0.3,
                 scholarshipYears: 15,
