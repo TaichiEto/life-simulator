@@ -3,518 +3,142 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>人生シミュレーター</title>
+    <title>将来設計シミュレーター for Students</title>
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
 </head>
 <body>
-    <div id="tutorial-modal" class="modal">
-        <div class="modal-content">
-            <h2>🎯 人生シミュレーターへようこそ！</h2>
-            <div class="tutorial-content">
-                <p class="intro-text">
-                    このツールでは、人生の重要な命題である<strong>「いくら稼いで、いくら使うのか？」</strong>を深く考えることができます。
-                </p>
-                
-                <div class="tutorial-features">
-                    <div class="feature-item">
-                        <span class="feature-icon">💰</span>
-                        <div class="feature-content">
-                            <h3>収入と支出の可視化</h3>
-                            <p>現在の収入・支出から将来の資産推移をリアルタイムでグラフ表示</p>
-                        </div>
-                    </div>
-                    
-                    <div class="feature-item">
-                        <span class="feature-icon">🎓</span>
-                        <div class="feature-content">
-                            <h3>大学生対応</h3>
-                            <p>奨学金返済、就職、バイト代などを考慮したシミュレーション</p>
-                        </div>
-                    </div>
-                    
-                    <div class="feature-item">
-                        <span class="feature-icon">👨‍👩‍👧‍👦</span>
-                        <div class="feature-content">
-                            <h3>家族計画</h3>
-                            <p>結婚、出産、子どもの教育費まで詳細に計画できます</p>
-                        </div>
-                    </div>
-                    
-                    <div class="feature-item">
-                        <span class="feature-icon">📊</span>
-                        <div class="feature-content">
-                            <h3>年齢別詳細分析</h3>
-                            <p>グラフをクリックして、その年齢での推奨事項を確認</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="tutorial-steps">
-                    <h3>使い方は簡単！</h3>
-                    <ol>
-                        <li><strong>基本情報</strong>を入力（年齢、収入、支出など）</li>
-                        <li><strong>家族計画</strong>を設定（結婚、子どもの人数など）</li>
-                        <li><strong>グラフ</strong>で将来の資産推移を確認</li>
-                        <li>気になる年齢をクリックして<strong>詳細分析</strong>を見る</li>
-                    </ol>
-                </div>
-                
-                <p class="privacy-note">
-                    📱 <strong>プライバシー保護</strong>：全てのデータはあなたのブラウザに保存され、サーバーに送信されることはありません。
-                </p>
-            </div>
-            
-            <div class="modal-buttons">
-                <button id="start-tutorial" class="primary-btn">チュートリアルを開始</button>
-                <button id="skip-tutorial" class="secondary-btn">スキップして使い始める</button>
-            </div>
-        </div>
-    </div>
-
     <div class="container">
         <header>
-            <h1>人生シミュレーター</h1>
-            <p>あなたの将来の資産推移を簡単にシミュレーションできます</p>
-            <button id="show-tutorial" class="help-btn" title="チュートリアルを表示">?</button>
+            <h1>将来設計シミュレーター</h1>
+            <p>大学生が将来のライフプランを考えるためのツールです</p>
         </header>
 
         <main>
             <section class="input-section">
-                <h2>💫 あなたの理想のライフプランを選択</h2>
-                
-                <div class="user-type-selector">
-                    <label>現在の状況</label>
-                    <div class="radio-group">
-                        <label class="radio-label">
-                            <input type="radio" name="user-type" value="student" id="user-type-student">
-                            <span>大学生</span>
-                        </label>
-                        <label class="radio-label">
-                            <input type="radio" name="user-type" value="working" id="user-type-working" checked>
-                            <span>社会人</span>
-                        </label>
-                    </div>
-                </div>
-
-                <form id="basic-info-form" class="basic-info-form">
-                    <h3>🎯 基本情報</h3>
+                <form id="main-form">
+                    <h3>🎓 基本情報</h3>
                     <div class="form-group">
                         <label for="current-age">現在の年齢</label>
-                        <input type="number" id="current-age" min="18" max="80" value="20" required>
-                        <span class="unit">歳</span>
+                        <input type="number" id="current-age" min="18" max="30" value="20" required>
                     </div>
-                    
                     <div class="form-group">
-                        <label for="current-savings">現在の貯蓄額</label>
-                        <input type="number" id="current-savings" min="0" value="100000" required>
-                        <span class="unit">円</span>
+                        <label for="graduation-age">卒業予定年齢</label>
+                        <input type="number" id="graduation-age" min="20" max="35" value="22" required>
                     </div>
-                    
+                    <div class="form-group">
+                        <label for="current-savings">現在の貯蓄額 (万円)</label>
+                        <input type="number" id="current-savings" min="0" value="50" step="10" required>
+                    </div>
                     <div class="form-group">
                         <label for="retire-age">リタイア希望年齢</label>
-                        <input type="number" id="retire-age" min="50" max="80" value="65" required>
-                        <span class="unit">歳</span>
+                        <input type="number" id="retire-age" min="55" max="80" value="65" required>
                     </div>
-                    
-                    <div class="form-group student-only" style="display: none;">
-                        <label for="graduation-age">卒業予定年齢</label>
-                        <input type="number" id="graduation-age" min="20" max="35" value="22">
-                        <span class="unit">歳</span>
+
+                    <h3>💰 奨学金 (任意)</h3>
+                    <div class="form-group">
+                        <label for="scholarship-debt">借入総額 (万円)</label>
+                        <input type="number" id="scholarship-debt" min="0" value="0" step="10">
                     </div>
-                    
-                    <div class="form-group student-only" style="display: none;">
-                        <label for="scholarship-debt">奨学金の借入総額</label>
-                        <input type="number" id="scholarship-debt" min="0" value="0">
-                        <span class="unit">円</span>
-                    </div>
-                    
-                    <div class="form-group student-only" style="display: none;">
-                        <label for="scholarship-interest">奨学金の年利率</label>
-                        <input type="number" id="scholarship-interest" min="0" max="10" step="0.1" value="0.3">
-                        <span class="unit">%</span>
-                    </div>
-                    
-                    <div class="form-group student-only" style="display: none;">
-                        <label for="scholarship-years">返済期間</label>
+                    <div class="form-group">
+                        <label for="scholarship-years">返済期間 (年)</label>
                         <input type="number" id="scholarship-years" min="1" max="20" value="15">
-                        <span class="unit">年</span>
+                    </div>
+
+                    <h3>🌟 ライフプランニング</h3>
+                    <div class="life-event-group">
+                        <h4>🏠 住まい</h4>
+                        <div class="form-group">
+                            <label for="housing-plan">住宅プラン</label>
+                            <select id="housing-plan">
+                                <option value="none">賃貸に住み続ける</option>
+                                <option value="house-regional">地方都市に家を買う</option>
+                                <option value="house-capital-suburbs">首都圏郊外に家を買う</option>
+                                <option value="condo-capital">首都圏にマンションを買う</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="housing-age-group" style="display: none;">
+                            <label for="housing-age">購入希望年齢</label>
+                            <input type="number" id="housing-age" min="25" max="60" value="35">
+                        </div>
+                    </div>
+
+                    <div class="life-event-group">
+                        <h4>🚗 車</h4>
+                        <div class="form-group">
+                            <label for="car-plan">車のプラン</label>
+                            <select id="car-plan">
+                                <option value="none">車は持たない</option>
+                                <option value="car-standard">国産の標準的な新車</option>
+                                <option value="car-luxury">国産の高級車・輸入車</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="car-age-group" style="display: none;">
+                            <label for="car-age">購入希望年齢</label>
+                            <input type="number" id="car-age" min="22" max="60" value="30">
+                        </div>
+                    </div>
+
+                    <div class="life-event-group">
+                        <h4>👨‍👩‍👧‍👦 家族計画</h4>
+                        <div class="form-group">
+                            <label for="children-count">希望する子供の人数</label>
+                            <select id="children-count">
+                                <option value="0">0人</option>
+                                <option value="1">1人</option>
+                                <option value="2">2人</option>
+                                <option value="3">3人</option>
+                            </select>
+                        </div>
+                        <div id="children-plans-container"></div>
+                    </div>
+
+                    <h3>⚙️ シミュレーション設定</h3>
+                     <div class="form-group">
+                        <label for="graph-end-age">グラフ表示終了年齢</label>
+                        <input type="number" id="graph-end-age" min="30" max="80" value="50">
+                    </div>
+                    <div class="form-group">
+                        <label for="disposable-income">目標年間可処分所得 (万円)</label>
+                        <input type="number" id="disposable-income" min="0" value="120" step="10">
                     </div>
                     
-                    <div class="calculation-note">
-                        <p>💡 <strong>収入は自動計算されます</strong></p>
-                        <p>あなたのやりたいことから必要な収入を逆算して表示します</p>
+                    <div class="action-buttons">
+                        <button type="button" id="calculate-btn" class="calculate-btn">🔥 あなたの未来を計算する</button>
                     </div>
                 </form>
-
-                <h3>👨‍👩‍👧‍👦 家族計画</h3>
-                <form id="family-plan-form" class="family-plan-form">
-                    <div class="form-group">
-                        <label for="marriage-age">結婚希望年齢</label>
-                        <input type="number" id="marriage-age" min="20" max="50" value="">
-                        <span class="unit">歳</span>
-                        <small class="help-text">結婚しない場合は空欄</small>
-                    </div>
-
-                    <div class="form-group marriage-dependent" style="display: none;">
-                        <label for="spouse-work-type">配偶者の働き方</label>
-                        <select id="spouse-work-type">
-                            <option value="full-time">フルタイム勤務</option>
-                            <option value="part-time">パートタイム勤務</option>
-                            <option value="homemaker">専業主婦/主夫</option>
-                            <option value="temporary-leave">一時的に離職（育児等）</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group marriage-dependent" style="display: none;">
-                        <label for="spouse-income">配偶者の期待月収入（手取り）</label>
-                        <input type="number" id="spouse-income" min="0" value="200000">
-                        <span class="unit">円</span>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="children-count">希望する子どもの人数</label>
-                        <input type="number" id="children-count" min="0" max="5" value="0">
-                        <span class="unit">人</span>
-                    </div>
-
-                    <div id="children-details" class="children-details" style="display: none;">
-                        <h4>子どもの教育プラン</h4>
-                        <div id="children-container"></div>
-                    </div>
-                </form>
-
-                <h3>🌟 やりたいこと・目標</h3>
-                <div id="life-goals-section" class="life-goals-section">
-                    <div class="goals-categories">
-                        <div class="goal-category">
-                            <h4>🏠 住まい（東京エリア）</h4>
-                            <div class="goal-options">
-                                <div class="goal-with-age">
-                                    <label class="checkbox-label">
-                                        <input type="checkbox" name="goals" value="tokyo-center" data-cost="150000000">
-                                        <span>都心に家を購入 (1.5億円)</span>
-                                    </label>
-                                    <input type="number" class="goal-age-input" data-goal="tokyo-center" min="25" max="70" value="40" placeholder="年齢">
-                                    <span class="age-unit">歳で</span>
-                                </div>
-                                <div class="goal-with-age">
-                                    <label class="checkbox-label">
-                                        <input type="checkbox" name="goals" value="tokyo-premium" data-cost="100000000">
-                                        <span>首都圏高級エリアに購入 (1億円)</span>
-                                    </label>
-                                    <input type="number" class="goal-age-input" data-goal="tokyo-premium" min="25" max="70" value="35" placeholder="年齢">
-                                    <span class="age-unit">歳で</span>
-                                </div>
-                                <div class="goal-with-age">
-                                    <label class="checkbox-label">
-                                        <input type="checkbox" name="goals" value="tokyo-suburbs" data-cost="80000000">
-                                        <span>郊外に購入 (8000万円)</span>
-                                    </label>
-                                    <input type="number" class="goal-age-input" data-goal="tokyo-suburbs" min="25" max="70" value="32" placeholder="年齢">
-                                    <span class="age-unit">歳で</span>
-                                </div>
-                                <div class="goal-with-age">
-                                    <label class="checkbox-label">
-                                        <input type="checkbox" name="goals" value="tokyo-distant" data-cost="30000000">
-                                        <span>少し遠めに購入 (3000万円)</span>
-                                    </label>
-                                    <input type="number" class="goal-age-input" data-goal="tokyo-distant" min="25" max="70" value="30" placeholder="年齢">
-                                    <span class="age-unit">歳で</span>
-                                </div>
-                                <div class="goal-with-age">
-                                    <label class="checkbox-label">
-                                        <input type="checkbox" name="goals" value="renovation" data-cost="8000000">
-                                        <span>住宅リフォーム (800万円)</span>
-                                    </label>
-                                    <input type="number" class="goal-age-input" data-goal="renovation" min="30" max="70" value="45" placeholder="年齢">
-                                    <span class="age-unit">歳で</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="goal-category">
-                            <h4>🚗 車・移動</h4>
-                            <div class="goal-options">
-                                <div class="goal-with-age">
-                                    <label class="checkbox-label">
-                                        <input type="checkbox" name="goals" value="car-new" data-cost="4000000">
-                                        <span>新車購入 (400万円)</span>
-                                    </label>
-                                    <input type="number" class="goal-age-input" data-goal="car-new" min="20" max="70" value="25" placeholder="年齢">
-                                    <span class="age-unit">歳で</span>
-                                </div>
-                                <div class="goal-with-age">
-                                    <label class="checkbox-label">
-                                        <input type="checkbox" name="goals" value="car-premium" data-cost="8000000">
-                                        <span>プレミアム車購入 (800万円)</span>
-                                    </label>
-                                    <input type="number" class="goal-age-input" data-goal="car-premium" min="20" max="70" value="30" placeholder="年齢">
-                                    <span class="age-unit">歳で</span>
-                                </div>
-                                <div class="goal-with-age">
-                                    <label class="checkbox-label">
-                                        <input type="checkbox" name="goals" value="car-luxury" data-cost="15000000">
-                                        <span>高級車購入 (1500万円)</span>
-                                    </label>
-                                    <input type="number" class="goal-age-input" data-goal="car-luxury" min="30" max="70" value="40" placeholder="年齢">
-                                    <span class="age-unit">歳で</span>
-                                </div>
-                                <label class="checkbox-label">
-                                    <input type="checkbox" name="goals" value="car-replacement" data-cost="4000000" data-recurring="true">
-                                    <span>車の定期買い替え (10年毎400万円)</span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <div class="goal-category">
-                            <h4>✈️ 旅行・体験</h4>
-                            <div class="goal-options">
-                                <div class="goal-with-age">
-                                    <label class="checkbox-label">
-                                        <input type="checkbox" name="goals" value="world-trip" data-cost="3000000">
-                                        <span>世界一周旅行 (300万円)</span>
-                                    </label>
-                                    <input type="number" class="goal-age-input" data-goal="world-trip" min="20" max="70" value="30" placeholder="年齢">
-                                    <span class="age-unit">歳で</span>
-                                </div>
-                                <label class="checkbox-label">
-                                    <input type="checkbox" name="goals" value="annual-travel-basic" data-cost="300000" data-recurring="true">
-                                    <span>毎年の国内旅行 (年30万円)</span>
-                                </label>
-                                <label class="checkbox-label">
-                                    <input type="checkbox" name="goals" value="annual-travel-premium" data-cost="800000" data-recurring="true">
-                                    <span>毎年の海外旅行 (年80万円)</span>
-                                </label>
-                                <div class="goal-with-age">
-                                    <label class="checkbox-label">
-                                        <input type="checkbox" name="goals" value="luxury-travel" data-cost="5000000">
-                                        <span>贅沢な記念旅行 (500万円)</span>
-                                    </label>
-                                    <input type="number" class="goal-age-input" data-goal="luxury-travel" min="25" max="70" value="40" placeholder="年齢">
-                                    <span class="age-unit">歳で</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="goal-category">
-                            <h4>🎓 学び・成長</h4>
-                            <div class="goal-options">
-                                <label class="checkbox-label">
-                                    <input type="checkbox" name="goals" value="mba-domestic" data-cost="8000000" data-age="35">
-                                    <span>国内MBA取得 (800万円)</span>
-                                </label>
-                                <label class="checkbox-label">
-                                    <input type="checkbox" name="goals" value="mba-overseas" data-cost="25000000" data-age="35">
-                                    <span>海外MBA取得 (2500万円)</span>
-                                </label>
-                                <label class="checkbox-label">
-                                    <input type="checkbox" name="goals" value="language-study" data-cost="2000000" data-age="30">
-                                    <span>語学留学 (200万円)</span>
-                                </label>
-                                <label class="checkbox-label">
-                                    <input type="checkbox" name="goals" value="skill-investment" data-cost="1000000" data-recurring="true">
-                                    <span>継続的なスキル投資 (年100万円)</span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <div class="goal-category">
-                            <h4>💼 仕事・起業</h4>
-                            <div class="goal-options">
-                                <label class="checkbox-label">
-                                    <input type="checkbox" name="goals" value="startup-small" data-cost="10000000" data-age="30">
-                                    <span>小規模起業資金 (1000万円)</span>
-                                </label>
-                                <label class="checkbox-label">
-                                    <input type="checkbox" name="goals" value="startup-large" data-cost="50000000" data-age="35">
-                                    <span>本格起業資金 (5000万円)</span>
-                                </label>
-                                <label class="checkbox-label">
-                                    <input type="checkbox" name="goals" value="early-retirement-50" data-retire-age="50">
-                                    <span>早期リタイア (50歳)</span>
-                                </label>
-                                <label class="checkbox-label">
-                                    <input type="checkbox" name="goals" value="early-retirement-55" data-retire-age="55">
-                                    <span>セミリタイア (55歳)</span>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </section>
 
-            <section class="results-section">
-                <h2>💰 必要収入シミュレーション結果</h2>
-                
-                <div id="calculation-results" class="calculation-results">
-                    <div class="result-summary">
-                        <div class="result-card main-result">
-                            <h3>🎯 目標達成に必要な月収入</h3>
-                            <div class="result-value" id="required-monthly-income">¥0</div>
-                            <p class="result-note">手取り額（税引き後）</p>
-                            <div class="deviation-info" id="deviation-info" style="display: none;">
-                                <div class="deviation-score">偏差値: <span id="deviation-score">--</span></div>
-                                <div class="deviation-rank">上位<span id="deviation-rank">--</span>%</div>
-                            </div>
-                        </div>
-                        
-                        <div class="result-breakdown">
-                            <h4>💎 内訳</h4>
-                            <div class="breakdown-item">
-                                <span class="breakdown-label">基本生活費</span>
-                                <span class="breakdown-value" id="basic-living-cost">¥0</span>
-                            </div>
-                            <div class="breakdown-item">
-                                <span class="breakdown-label">家族関連費用</span>
-                                <span class="breakdown-value" id="family-cost">¥0</span>
-                            </div>
-                            <div class="breakdown-item">
-                                <span class="breakdown-label">目標・夢の実現費用</span>
-                                <span class="breakdown-value" id="goals-cost">¥0</span>
-                            </div>
-                            <div class="breakdown-item">
-                                <span class="breakdown-label">奨学金返済</span>
-                                <span class="breakdown-value" id="scholarship-cost">¥0</span>
-                            </div>
-                            <div class="breakdown-item">
-                                <span class="breakdown-label">リタイア資金積立</span>
-                                <span class="breakdown-value" id="retirement-savings">¥0</span>
-                            </div>
-                        </div>
+            <section class="results-section" style="display: none;">
+                <h2>💰 年齢別シミュレーション</h2>
+                <div id="calculation-results">
+                    <div id="loan-requirement-note" class="loan-note" style="display: none;">
+                        <!-- Message about loan requirements will be inserted here -->
                     </div>
-                    
-                    <div class="timeline-section">
-                        <h4>📅 年齢別必要収入 タイムライン</h4>
-                        <div id="income-timeline" class="income-timeline"></div>
-                    </div>
-                    
-                    <div class="timeline-section">
-                        <h4>🎯 ライフイベント予定</h4>
-                        <div id="life-timeline" class="life-timeline"></div>
-                    </div>
-                    
-                    <div class="advice-section">
-                        <h4>💡 アドバイス</h4>
-                        <div id="calculation-advice" class="advice-content">
-                            <p>上記の条件を入力して「計算実行」ボタンを押してください。</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="action-buttons">
-                    <button id="calculate-btn" class="calculate-btn">🔥 計算実行</button>
-                    <button id="export-plan-btn" class="export-btn" style="display: none;">📊 プラン保存</button>
-                </div>
-                
-                <div class="chart-container" style="display: none;">
-                    <h4>📈 詳細グラフ</h4>
-                    <div class="chart-tabs">
-                        <button id="asset-chart-tab" class="chart-tab active">資産推移</button>
-                        <button id="expense-chart-tab" class="chart-tab">年齢別支出</button>
-                    </div>
-                    <canvas id="asset-chart" style="display: block;"></canvas>
-                    <canvas id="age-expense-chart" style="display: none;"></canvas>
-                    <button id="show-chart-btn" class="secondary-btn">グラフを表示</button>
-                </div>
-            </section>
 
-            <section class="events-section">
-                <h2>ライフイベント</h2>
-                <div class="events-controls">
-                    <button id="add-event-btn" class="add-event-btn">イベント追加</button>
-                    <button id="reset-data-btn" class="reset-btn">データリセット</button>
-                </div>
-                
-                <div id="event-form" class="event-form" style="display: none;">
-                    <h3>新しいイベントを追加</h3>
-                    <div class="form-group">
-                        <label for="event-age">発生年齢</label>
-                        <input type="number" id="event-age" min="18" max="80" required>
-                        <span class="unit">歳</span>
+                    <div class="chart-container">
+                        <p class="chart-note">グラフの各年齢をクリックすると、詳細な内訳が見れます。</p>
+                        <canvas id="asset-chart"></canvas>
                     </div>
-                    
-                    <div class="form-group">
-                        <label for="event-type">イベントタイプ</label>
-                        <select id="event-type" required>
-                            <option value="">選択してください</option>
-                            <option value="income-change">収入の変化</option>
-                            <option value="expense-change">支出の変化</option>
-                            <option value="one-time-income">一時的な収入</option>
-                            <option value="one-time-expense">一時的な支出</option>
-                            <option value="job-start" class="student-option" style="display: none;">就職開始</option>
-                            <option value="scholarship-start" class="student-option" style="display: none;">奨学金返済開始</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="event-amount">金額</label>
-                        <input type="number" id="event-amount" required>
-                        <span class="unit">円</span>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="event-description">説明</label>
-                        <input type="text" id="event-description" placeholder="例：結婚、昇進、家の購入など" required>
-                    </div>
-                    
-                    <div class="form-buttons">
-                        <button type="button" id="save-event-btn">保存</button>
-                        <button type="button" id="cancel-event-btn">キャンセル</button>
-                    </div>
-                </div>
 
-                <div id="events-list" class="events-list">
-                    <h3>追加済みイベント</h3>
-                    <div id="events-container"></div>
+                    <div class="timeline-section">
+                        <h4>📅 ライフイベント・タイムライン</h4>
+                        <ul id="life-event-timeline">
+                            <!-- Timeline items will be added here -->
+                        </ul>
+                    </div>
                 </div>
             </section>
         </main>
-
-        <footer>
-            <p>※ 全てのデータはブラウザに保存され、サーバーに送信されません</p>
-        </footer>
     </div>
 
-    <!-- 年齢詳細表示モーダル -->
-    <div id="age-details" class="age-details" style="display: none;">
-        <button id="close-age-details" class="close-btn">×</button>
-        <h3 id="selected-age-title">年齢時点の詳細分析</h3>
-        <div class="age-details-content">
-            <div class="detail-item">
-                <span class="detail-label">資産額</span>
-                <span class="detail-value" id="detail-assets">¥0</span>
-            </div>
-            <div class="detail-item">
-                <span class="detail-label">月収入</span>
-                <span class="detail-value" id="detail-income">¥0</span>
-            </div>
-            <div class="detail-item">
-                <span class="detail-label">理想月収入</span>
-                <span class="detail-value" id="detail-ideal-income">¥0</span>
-            </div>
-            <div class="detail-item">
-                <span class="detail-label">月支出</span>
-                <span class="detail-value" id="detail-expense">¥0</span>
-            </div>
-            <div class="detail-item">
-                <span class="detail-label">年間収支</span>
-                <span class="detail-value" id="detail-annual-balance">¥0</span>
-            </div>
-            <div class="detail-item">
-                <span class="detail-label">理想貯蓄額</span>
-                <span class="detail-value" id="detail-ideal-savings">¥0</span>
-            </div>
-            
-            <div class="detail-required">
-                <h4>💰 収入・貯蓄の目標</h4>
-                <div id="detail-requirements" class="detail-requirements"></div>
-            </div>
-            
-            <div class="detail-advice">
-                <h4>💡 この年齢でのアドバイス</h4>
-                <ul id="detail-recommendations"></ul>
-            </div>
+    <!-- Age Detail Modal -->
+    <div id="age-detail-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <button id="modal-close-btn" class="modal-close">&times;</button>
+            <h3 id="modal-title"></h3>
+            <div id="modal-body"></div>
         </div>
     </div>
 
