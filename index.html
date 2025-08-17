@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>人生シミュレーター</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>人生シミュレーター</h1>
+            <p>あなたの将来の資産推移を簡単にシミュレーションできます</p>
+        </header>
+
+        <main>
+            <section class="input-section">
+                <h2>基本情報</h2>
+                <form id="basic-info-form" class="basic-info-form">
+                    <div class="form-group">
+                        <label for="current-age">現在の年齢</label>
+                        <input type="number" id="current-age" min="18" max="80" value="25" required>
+                        <span class="unit">歳</span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="current-savings">現在の貯蓄額</label>
+                        <input type="number" id="current-savings" min="0" value="1000000" required>
+                        <span class="unit">円</span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="monthly-income">毎月の収入（手取り）</label>
+                        <input type="number" id="monthly-income" min="0" value="300000" required>
+                        <span class="unit">円</span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="monthly-expense">毎月の支出</label>
+                        <input type="number" id="monthly-expense" min="0" value="200000" required>
+                        <span class="unit">円</span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="retire-age">想定するリタイア年齢</label>
+                        <input type="number" id="retire-age" min="50" max="80" value="65" required>
+                        <span class="unit">歳</span>
+                    </div>
+                </form>
+            </section>
+
+            <section class="chart-section">
+                <h2>資産推移グラフ</h2>
+                <div class="chart-container">
+                    <canvas id="asset-chart"></canvas>
+                </div>
+            </section>
+
+            <section class="events-section">
+                <h2>ライフイベント</h2>
+                <div class="events-controls">
+                    <button id="add-event-btn" class="add-event-btn">イベント追加</button>
+                    <button id="reset-data-btn" class="reset-btn">データリセット</button>
+                </div>
+                
+                <div id="event-form" class="event-form" style="display: none;">
+                    <h3>新しいイベントを追加</h3>
+                    <div class="form-group">
+                        <label for="event-age">発生年齢</label>
+                        <input type="number" id="event-age" min="18" max="80" required>
+                        <span class="unit">歳</span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="event-type">イベントタイプ</label>
+                        <select id="event-type" required>
+                            <option value="">選択してください</option>
+                            <option value="income-change">収入の変化</option>
+                            <option value="expense-change">支出の変化</option>
+                            <option value="one-time-income">一時的な収入</option>
+                            <option value="one-time-expense">一時的な支出</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="event-amount">金額</label>
+                        <input type="number" id="event-amount" required>
+                        <span class="unit">円</span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="event-description">説明</label>
+                        <input type="text" id="event-description" placeholder="例：結婚、昇進、家の購入など" required>
+                    </div>
+                    
+                    <div class="form-buttons">
+                        <button type="button" id="save-event-btn">保存</button>
+                        <button type="button" id="cancel-event-btn">キャンセル</button>
+                    </div>
+                </div>
+
+                <div id="events-list" class="events-list">
+                    <h3>追加済みイベント</h3>
+                    <div id="events-container"></div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>※ 全てのデータはブラウザに保存され、サーバーに送信されません</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
