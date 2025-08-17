@@ -513,8 +513,8 @@ class LifeSimulator {
         const familyDistributionYears = Math.min(25, yearsUntilRetire);
         const monthlyFamilyCost = totalFamilyCost / (familyDistributionYears * 12);
         
-        // 結婚による生活費増加（家賃や食費など）
-        const marriageExtraCost = this.familyPlan.marriageAge ? 30000 : 0;
+        // 結婚による生活費増加は上記のbasicLivingCostに含まれているため不要
+        const marriageExtraCost = 0;
         
         const totalRequiredIncome = basicLivingCost + marriageExtraCost + monthlyFamilyCost + monthlyGoalsCost + 
                                    recurringGoalsCost + scholarshipCost + monthlyRetirementSaving + housingLoanPayment - spouseIncome;
