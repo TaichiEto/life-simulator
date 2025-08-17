@@ -28,30 +28,6 @@
 
 全てのデータはクライアントサイド（ブラウザ）で処理され、サーバーに送信されることはありません。
 
-## GitHub Pagesでの利用
-
-このアプリケーションは静的サイトとして動作するため、GitHub Pagesで簡単にホストできます。
-
-### セットアップ手順
-
-1. このリポジトリをfork
-2. Settings > Pages でSource を `Deploy from a branch` に設定
-3. Branch を `main` に設定
-4. 数分後に `https://[username].github.io/life-simulation` でアクセス可能
-
-## ローカルでの開発
-
-```bash
-# リポジトリをクローン
-git clone https://github.com/[username]/life-simulation.git
-cd life-simulation
-
-# ローカルサーバーを起動
-python3 -m http.server 8000
-
-# ブラウザで http://localhost:8000 を開く
-```
-
 ## ライセンス
 
 MIT License
