@@ -2,17 +2,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- DATA ---
     const EDUCATION_COSTS = {
-        // 年間費用
-        public_elem: 350000,    // 公立小学校
-        public_middle: 540000,   // 公立中学校
-        public_high: 520000,    // 公立高校
-        private_elem: 1670000,   // 私立小学校
-        private_middle: 1440000,  // 私立中学校
-        private_high: 1050000,   // 私立高校
-        uni_public: 650000,     // 国公立大学
-        uni_private_liberal: 1030000, // 私立大学（文系）
-        uni_private_science: 1380000, // 私立大学（理系）
-        uni_private_medical: 4000000, // 私立大学（医歯薬系） 6年間の平均
+        public_elem: 350000, public_middle: 540000, public_high: 520000,
+        private_elem: 1670000, private_middle: 1440000, private_high: 1050000,
+        uni_public: 650000, uni_private_liberal: 1030000, uni_private_science: 1380000, uni_private_medical: 4000000,
     };
 
     const EDUCATION_TRACKS = {
@@ -33,9 +25,15 @@ document.addEventListener('DOMContentLoaded', () => {
             'car-luxury': { name: '高級車を購入', cost: 8000000, loanTerm: 7, interestRate: 3.0 },
         }
     };
-    const CORE_LIVING_COST_ANNUAL = (80000 * 12); // 食費・光熱費・通信費・雑費など
-    const ANNUAL_RENT = 1200000; // 家賃 年120万
-    const PROPERTY_MAINTENANCE_RATE = 0.005; // 固定資産税・維持費率
+
+    const REALISTIC_INCOME_MODEL = {
+        base: 250000 * 12, // 初任給 月25万
+        growth_rate: 0.04, // 年4%成長
+        peak_age: 45,      // 45歳で成長が鈍化
+    };
+
+    const CORE_LIVING_COST_ANNUAL = (80000 * 12);
+    const PROPERTY_MAINTENANCE_RATE = 0.005;
     const RETIREMENT_GOAL_AMOUNT = 30000000;
     const AFTER_TAX_RATE = 0.8;
     const LOAN_LIMIT_RATIO = 5;
@@ -53,7 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalCloseBtn = document.getElementById('modal-close-btn');
     const modalTitle = document.getElementById('modal-title');
     const modalBody = document.getElementById('modal-body');
-    let assetChart = null;
+    let incomeChart = null;
     let currentProgressionData = null;
 
     // --- Main Functions ---
@@ -85,11 +83,48 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const calculateFinancialProgression = (inputs, lifeEvents) => {
-        const { graduationAge, retireAge, currentSavings, graphEndAge, targetDisposableIncome } = inputs;
-        const labels = [], assetData = [], incomeData = [], expenseDetails = [];
-        let currentAsset = currentSavings;
+        const { graduationAge, retireAge, currentSavings, graphEndAge, targetDisposableIncome, annualRent } = inputs;
+        const labels = [], requiredIncomeData = [], typicalIncomeData = [], assetData = [], expenseDetails = [];
         const displayEndAge = Math.min(retireAge, graphEndAge);
-        
+
+        // Step 1: Calculate the total financial need over the entire career (pre-tax)
+        let totalLifetimeNeedPreTax = 0;
+        const housingEvent = lifeEvents.find(e => e.type === 'loan' && e.name.includes('購入'));
+        for (let age = graduationAge; age < retireAge; age++) {
+            let annualLivingCost = CORE_LIVING_COST_ANNUAL + (housingEvent ? (age < housingEvent.age ? annualRent : housingEvent.cost * PROPERTY_MAINTENANCE_RATE) : annualRent);
+            const annualScholarshipCost = (age < graduationAge + inputs.scholarshipYears) ? (inputs.scholarshipDebt / inputs.scholarshipYears) : 0;
+            let annualEducationCost = 0;
+            lifeEvents.filter(e => e.type === 'education').forEach(child => {
+                const childAge = age - child.birthAge;
+                const track = EDUCATION_TRACKS[child.track];
+                if (childAge >= 6 && childAge < 12) annualEducationCost += EDUCATION_COSTS[`${track.stages.elem}_elem`];
+                if (childAge >= 12 && childAge < 15) annualEducationCost += EDUCATION_COSTS[`${track.stages.middle}_middle`];
+                if (childAge >= 15 && childAge < 18) annualEducationCost += EDUCATION_COSTS[`${track.stages.high}_high`];
+                if (childAge >= 18 && childAge < (track.stages.uni === 'uni_private_medical' ? 24 : 22)) annualEducationCost += EDUCATION_COSTS[track.stages.uni];
+            });
+            let annualLoanPayments = 0;
+            lifeEvents.filter(e => e.type === 'loan').forEach(loan => {
+                if (age >= loan.age && age < loan.age + loan.loanTerm) {
+                    annualLoanPayments += calculateMonthlyPayment(loan.cost, loan.interestRate, loan.loanTerm) * 12;
+                }
+            });
+            const annualExpensesAfterTax = annualLivingCost + annualScholarshipCost + annualEducationCost + annualLoanPayments;
+            totalLifetimeNeedPreTax += (annualExpensesAfterTax + targetDisposableIncome) / AFTER_TAX_RATE;
+        }
+        totalLifetimeNeedPreTax += (RETIREMENT_GOAL_AMOUNT - currentSavings) / AFTER_TAX_RATE;
+
+        // Step 2: Create the earning power curve (typical income model)
+        const earningPowerCurve = [];
+        let totalEarningPower = 0;
+        for (let age = graduationAge; age < retireAge; age++) {
+            const yearsSinceGrad = age - graduationAge;
+            const growthFactor = Math.pow(1 + REALISTIC_INCOME_MODEL.growth_rate, Math.min(yearsSinceGrad, REALISTIC_INCOME_MODEL.peak_age - graduationAge));
+            const power = REALISTIC_INCOME_MODEL.base * growthFactor;
+            earningPowerCurve.push(power);
+            totalEarningPower += power;
+        }
+
+        // Step 3: Distribute the total need according to the earning power curve
         let peakLoanRequiredIncome = 0;
         let peakLoanEvent = null;
         lifeEvents.filter(e => e.type === 'loan').forEach(event => {
@@ -100,32 +135,24 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        const annualRetirementSaving = (RETIREMENT_GOAL_AMOUNT - currentSavings) / (retireAge - graduationAge);
+        let currentAsset = currentSavings;
         let activeLoans = [];
-        const housingEvent = lifeEvents.find(e => e.type === 'loan' && e.name.includes('購入'));
-
         for (let age = graduationAge; age <= displayEndAge; age++) {
             labels.push(age);
+            const careerYearIndex = age - graduationAge;
 
-            lifeEvents.filter(e => e.type === 'loan' && e.age === age).forEach(event => {
-                activeLoans.push({ ...event, endAge: age + event.loanTerm });
-            });
+            const earningWeight = earningPowerCurve[careerYearIndex] / totalEarningPower;
+            const expenseBasedRequiredIncome = totalLifetimeNeedPreTax * earningWeight;
+            const requiredAnnualIncomePreTax = Math.max(peakLoanRequiredIncome, expenseBasedRequiredIncome);
+            requiredIncomeData.push(Math.round(requiredAnnualIncomePreTax));
+
+            typicalIncomeData.push(Math.round(earningPowerCurve[careerYearIndex]));
+
+            // Recalculate annual expenses for this year to project assets
+            lifeEvents.filter(e => e.type === 'loan' && e.age === age).forEach(event => activeLoans.push({ ...event, endAge: age + event.loanTerm }));
             activeLoans = activeLoans.filter(loan => age < loan.endAge);
-
-            // Dynamic Annual Costs
-            let annualLivingCost = CORE_LIVING_COST_ANNUAL;
-            if (housingEvent) {
-                if (age < housingEvent.age) {
-                    annualLivingCost += ANNUAL_RENT;
-                } else {
-                    annualLivingCost += housingEvent.cost * PROPERTY_MAINTENANCE_RATE;
-                }
-            } else {
-                annualLivingCost += ANNUAL_RENT;
-            }
-
+            let annualLivingCost = CORE_LIVING_COST_ANNUAL + (housingEvent ? (age < housingEvent.age ? annualRent : housingEvent.cost * PROPERTY_MAINTENANCE_RATE) : annualRent);
             const annualScholarshipCost = (age < graduationAge + inputs.scholarshipYears) ? (inputs.scholarshipDebt / inputs.scholarshipYears) : 0;
-            
             let annualEducationCost = 0;
             lifeEvents.filter(e => e.type === 'education').forEach(child => {
                 const childAge = age - child.birthAge;
@@ -135,43 +162,40 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (childAge >= 15 && childAge < 18) annualEducationCost += EDUCATION_COSTS[`${track.stages.high}_high`];
                 if (childAge >= 18 && childAge < (track.stages.uni === 'uni_private_medical' ? 24 : 22)) annualEducationCost += EDUCATION_COSTS[track.stages.uni];
             });
-
-            let annualLoanPayments = 0;
-            activeLoans.forEach(loan => {
-                annualLoanPayments += calculateMonthlyPayment(loan.cost, loan.interestRate, loan.loanTerm) * 12;
-            });
-
-            const expenseBasedIncomeAfterTax = annualLivingCost + annualScholarshipCost + annualEducationCost + annualLoanPayments + annualRetirementSaving + targetDisposableIncome;
-            const expenseBasedIncomePreTax = expenseBasedIncomeAfterTax / AFTER_TAX_RATE;
-            const requiredAnnualIncomePreTax = Math.max(peakLoanRequiredIncome, expenseBasedIncomePreTax);
-            incomeData.push(Math.round(requiredAnnualIncomePreTax));
-
+            let annualLoanPayments = activeLoans.reduce((sum, loan) => sum + (calculateMonthlyPayment(loan.cost, loan.interestRate, loan.loanTerm) * 12), 0);
             const annualExpenses = annualLivingCost + annualScholarshipCost + annualEducationCost + annualLoanPayments;
+            
             currentAsset += (requiredAnnualIncomePreTax * AFTER_TAX_RATE) - annualExpenses - targetDisposableIncome;
             assetData.push(Math.round(currentAsset));
-            
-            expenseDetails.push({ living: annualLivingCost, scholarship: annualScholarshipCost, education: annualEducationCost, loans: annualLoanPayments, retirement: annualRetirementSaving, disposable: targetDisposableIncome });
+            expenseDetails.push({ living: annualLivingCost, scholarship: annualScholarshipCost, education: annualEducationCost, loans: annualLoanPayments, retirement: (requiredAnnualIncomePreTax * AFTER_TAX_RATE) - annualExpenses - targetDisposableIncome, disposable: targetDisposableIncome });
         }
 
-        return { labels, assetData, incomeData, expenseDetails, peakLoanEvent };
+        return { labels, requiredIncomeData, typicalIncomeData, assetData, expenseDetails, peakLoanEvent };
     };
 
     const renderChart = (progressionData) => {
-        if (assetChart) assetChart.destroy();
-        assetChart = new Chart(chartCanvas.getContext('2d'), {
+        if (incomeChart) incomeChart.destroy();
+        incomeChart = new Chart(chartCanvas.getContext('2d'), {
             type: 'line',
             data: {
                 labels: progressionData.labels,
-                datasets: [{
-                    label: 'あなたの予測資産',
-                    data: progressionData.assetData,
-                    borderColor: '#007aff', backgroundColor: 'rgba(0, 122, 255, 0.1)',
-                    fill: true, tension: 0.1, yAxisID: 'y',
-                }]
+                datasets: [
+                    {
+                        label: '夢を実現するための必要年収',
+                        data: progressionData.requiredIncomeData,
+                        borderColor: '#ff6b6b', backgroundColor: 'rgba(255, 107, 107, 0.1)',
+                        fill: true, tension: 0.1, yAxisID: 'y',
+                    },
+                    {
+                        label: '一般的な大卒の年収モデル',
+                        data: progressionData.typicalIncomeData,
+                        borderColor: '#007aff', fill: false, tension: 0.1, yAxisID: 'y',
+                    }
+                ]
             },
             options: {
                 responsive: true, maintainAspectRatio: false,
-                scales: { y: { type: 'linear', display: true, position: 'left', ticks: { callback: (value) => `¥${(value / 1000000).toFixed(1)}百万` } } },
+                scales: { y: { ticks: { callback: (value) => `¥${(value / 1000000).toFixed(1)}百万` } } },
                 onClick: (event, elements) => {
                     if (elements.length > 0) showAgeDetailsModal(elements[0].index);
                 },
@@ -179,11 +203,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     tooltip: {
                         callbacks: {
                             title: (context) => `${context[0].label}歳時点`,
-                            label: (context) => `予測資産: ¥${(context.parsed.y / 1000000).toFixed(2)}百万`,
-                            afterLabel: (context) => {
-                                const income = progressionData.incomeData[context.dataIndex];
-                                return `\nこの年に必要な年収: ¥${formatNumber(income)}\n（クリックで詳細表示）`;
-                            }
+                            label: (context) => `${context.dataset.label}: ¥${formatNumber(context.parsed.y)}`,
+                            afterLabel: (context) => `（クリックで詳細表示）`
                         }
                     }
                 }
@@ -193,17 +214,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const showAgeDetailsModal = (index) => {
         const age = currentProgressionData.labels[index];
-        const income = currentProgressionData.incomeData[index];
+        const requiredIncome = currentProgressionData.requiredIncomeData[index];
+        const typicalIncome = currentProgressionData.typicalIncomeData[index];
         const asset = currentProgressionData.assetData[index];
         const expenses = currentProgressionData.expenseDetails[index];
-        const totalExpenses = Object.values(expenses).reduce((sum, val) => sum + val, 0) - expenses.disposable; // disposable is not an expense
-        const disposableIncome = (income * AFTER_TAX_RATE) - totalExpenses;
+        const disposableIncome = expenses.disposable;
 
         modalTitle.textContent = `${age}歳時点の詳細`;
         modalBody.innerHTML = `
             <div class="detail-item">
-                <span class="detail-label">📈 この年に必要な年収</span>
-                <span class="detail-value income">¥${formatNumber(income)}</span>
+                <span class="detail-label">🔥 夢のための必要年収</span>
+                <span class="detail-value income">¥${formatNumber(requiredIncome)}</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">📊 一般的なモデル年収</span>
+                <span class="detail-value">¥${formatNumber(typicalIncome)}</span>
             </div>
             <div class="detail-item">
                 <span class="detail-label">💰 年間可処分所得</span>
@@ -254,6 +279,7 @@ document.addEventListener('DOMContentLoaded', () => {
         scholarshipYears: parseInt(document.getElementById('scholarship-years').value),
         graphEndAge: parseInt(document.getElementById('graph-end-age').value),
         targetDisposableIncome: parseInt(document.getElementById('disposable-income').value) * 10000,
+        annualRent: parseInt(document.getElementById('rent-cost').value) * 10000 * 12,
     });
 
     const buildLifeEvents = (inputs) => {
@@ -309,8 +335,16 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    const handlePlanChange = (planElement, ageGroupElement) => {
-        ageGroupElement.style.display = planElement.value === 'none' ? 'none' : 'block';
+    const updateHousingInputs = () => {
+        const housingAgeGroup = document.getElementById('housing-age-group');
+        const rentCostGroup = document.getElementById('rent-cost-group');
+        if (housingPlan.value === 'none') {
+            housingAgeGroup.style.display = 'none';
+            rentCostGroup.style.display = 'block';
+        } else {
+            housingAgeGroup.style.display = 'block';
+            rentCostGroup.style.display = 'none';
+        }
     };
 
     const renderChildrenPlans = () => {
@@ -343,8 +377,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Event Listeners ---
     calculateBtn.addEventListener('click', calculateAndDisplayResults);
-    housingPlan.addEventListener('change', () => handlePlanChange(housingPlan, document.getElementById('housing-age-group')));
-    carPlan.addEventListener('change', () => handlePlanChange(carPlan, document.getElementById('car-age-group')));
+    housingPlan.addEventListener('change', updateHousingInputs);
+    carPlan.addEventListener('change', () => {
+        document.getElementById('car-age-group').style.display = carPlan.value === 'none' ? 'none' : 'block';
+    });
     childrenCount.addEventListener('change', renderChildrenPlans);
     modalCloseBtn.addEventListener('click', () => modal.style.display = 'none');
     modal.addEventListener('click', (e) => {
@@ -352,5 +388,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // --- Initial State ---
+    updateHousingInputs();
     renderChildrenPlans();
 });
